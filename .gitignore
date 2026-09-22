@@ -13,3 +13,6 @@ node_modules/
 dist/
 .env
 .env.local
+
+# logs do iniciar-sistema-web-silencioso.ps1
+logs/
