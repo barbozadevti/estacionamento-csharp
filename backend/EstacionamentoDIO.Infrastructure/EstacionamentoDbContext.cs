@@ -33,6 +33,7 @@ public class EstacionamentoDbContext : DbContext
             entidade.Property(v => v.HoraEntrada).IsRequired().HasConversion(conversorDataUtc);
             entidade.Property(v => v.HoraSaida).HasConversion(conversorDataUtcNullable);
             entidade.Property(v => v.ValorCobrado).HasColumnType("decimal(10,2)");
+            entidade.Property(v => v.FormaPagamento).HasConversion<string>().HasMaxLength(30);
             entidade.HasIndex(v => new { v.Placa, v.HoraSaida });
         });
     }

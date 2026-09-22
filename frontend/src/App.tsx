@@ -4,11 +4,13 @@ import { EntradaForm } from './components/EntradaForm'
 import { ErroConexaoBanner } from './components/ErroConexaoBanner'
 import { Header } from './components/Header'
 import { HistoricoTable } from './components/HistoricoTable'
+import { PagamentoModal } from './components/PagamentoModal'
 import { StatusCards } from './components/StatusCards'
 import { Tabs, type Aba } from './components/Tabs'
 import { Toast, type ToastData } from './components/Toast'
 import { VeiculosEstacionadosTable } from './components/VeiculosEstacionadosTable'
-import type { StatusEstacionamento, Veiculo } from './types/estacionamento'
+import type { FormaPagamento, StatusEstacionamento, Veiculo } from './types/estacionamento'
+import { rotuloFormaPagamento } from './types/estacionamento'
 import { formatarMoeda } from './utils/format'
 
 const INTERVALO_POLL_MS = 9000
@@ -28,6 +30,7 @@ function App() {
   const [erroConexao, setErroConexao] = useState<string | null>(null)
   const [placasProcessando, setPlacasProcessando] = useState<Set<string>>(new Set())
   const [toast, setToast] = useState<ToastData | null>(null)
+  const [placaEmPagamento, setPlacaEmPagamento] = useState<string | null>(null)
 
   const carregarPrincipal = useCallback(async () => {
     try {
@@ -94,10 +97,10 @@ function App() {
     }
   }
 
-  async function handleRegistrarSaida(placa: string) {
+  async function handleConfirmarPagamento(placa: string, formaPagamento: FormaPagamento) {
     setPlacasProcessando((prev) => new Set(prev).add(placa))
     try {
-      const resposta = await registrarSaida(placa)
+      const resposta = await registrarSaida(placa, formaPagamento)
       setVeiculosEstacionados((prev) => prev.filter((v) => v.placa !== placa))
       setHistorico((prev) => [resposta.veiculo, ...prev])
       setStatus((prev) =>
@@ -107,10 +110,11 @@ function App() {
       )
       setToast({
         tipo: 'sucesso',
-        mensagem: `Saída registrada para ${placa}. Valor cobrado: ${formatarMoeda(
+        mensagem: `Saída registrada para ${placa} via ${rotuloFormaPagamento(formaPagamento)}. Valor cobrado: ${formatarMoeda(
           resposta.valorCobrado,
         )} (${resposta.horas}h de permanência).`,
       })
+      setPlacaEmPagamento(null)
     } catch (err) {
       setToast({ tipo: 'erro', mensagem: mensagemDeErro(err, 'Erro ao registrar saída.') })
     } finally {
@@ -144,7 +148,7 @@ function App() {
         {abaAtiva === 'estacionados' ? (
           <VeiculosEstacionadosTable
             veiculos={veiculosEstacionados}
-            onRegistrarSaida={handleRegistrarSaida}
+            onAbrirPagamento={setPlacaEmPagamento}
             placasProcessando={placasProcessando}
             carregando={carregandoInicial}
           />
@@ -155,6 +159,15 @@ function App() {
           />
         )}
       </main>
+
+      {placaEmPagamento && (
+        <PagamentoModal
+          placa={placaEmPagamento}
+          processando={placasProcessando.has(placaEmPagamento)}
+          onConfirmar={(forma) => handleConfirmarPagamento(placaEmPagamento, forma)}
+          onFechar={() => setPlacaEmPagamento(null)}
+        />
+      )}
 
       <Toast toast={toast} onFechar={() => setToast(null)} />
     </div>

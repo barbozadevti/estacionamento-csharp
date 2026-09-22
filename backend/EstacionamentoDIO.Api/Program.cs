@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using EstacionamentoDIO.Api.Middleware;
 using EstacionamentoDIO.Application;
 using EstacionamentoDIO.Infrastructure;
@@ -10,7 +11,11 @@ var origensPermitidas = builder.Configuration
     .GetSection("Cors:OrigensPermitidas")
     .Get<string[]>() ?? ["http://localhost:5173", "http://localhost:3000"];
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

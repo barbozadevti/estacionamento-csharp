@@ -3,6 +3,7 @@ using System;
 using EstacionamentoDIO.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EstacionamentoDIO.Infrastructure.Migrations
 {
     [DbContext(typeof(EstacionamentoDbContext))]
-    partial class EstacionamentoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260922225948_AddFormaPagamento")]
+    partial class AddFormaPagamento
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.9");

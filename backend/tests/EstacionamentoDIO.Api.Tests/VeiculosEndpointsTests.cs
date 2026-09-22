@@ -1,11 +1,18 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using EstacionamentoDIO.Application;
 
 namespace EstacionamentoDIO.Api.Tests;
 
 public class VeiculosEndpointsTests : IClassFixture<ApiFactory>
 {
+    private static readonly JsonSerializerOptions OpcoesJson = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter() },
+    };
+
     private readonly HttpClient cliente;
 
     public VeiculosEndpointsTests(ApiFactory fabrica)
@@ -49,7 +56,7 @@ public class VeiculosEndpointsTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task RegistrarSaida_VeiculoInexistente_DeveRetornar404()
     {
-        var resposta = await cliente.PostAsync("/api/veiculos/NUNCA99/saida", content: null);
+        var resposta = await cliente.PostAsJsonAsync("/api/veiculos/NUNCA99/saida", new { formaPagamento = "Pix" });
 
         Assert.Equal(HttpStatusCode.NotFound, resposta.StatusCode);
     }
@@ -61,17 +68,18 @@ public class VeiculosEndpointsTests : IClassFixture<ApiFactory>
 
         await cliente.PostAsJsonAsync("/api/veiculos/entrada", new { placa });
 
-        var listaEstacionados = await cliente.GetFromJsonAsync<List<VeiculoDto>>("/api/veiculos?status=estacionados");
+        var listaEstacionados = await cliente.GetFromJsonAsync<List<VeiculoDto>>("/api/veiculos?status=estacionados", OpcoesJson);
         Assert.Contains(listaEstacionados!, v => v.Placa == placa);
 
-        var respostaSaida = await cliente.PostAsync($"/api/veiculos/{placa}/saida", content: null);
+        var respostaSaida = await cliente.PostAsJsonAsync($"/api/veiculos/{placa}/saida", new { formaPagamento = "Pix" });
         Assert.Equal(HttpStatusCode.OK, respostaSaida.StatusCode);
 
-        var resultado = await respostaSaida.Content.ReadFromJsonAsync<RegistrarSaidaResultDto>();
+        var resultado = await respostaSaida.Content.ReadFromJsonAsync<RegistrarSaidaResultDto>(OpcoesJson);
         Assert.True(resultado!.ValorCobrado > 0);
+        Assert.Equal(EstacionamentoDIO.Domain.Entities.FormaPagamento.Pix, resultado.FormaPagamento);
 
-        var historico = await cliente.GetFromJsonAsync<List<VeiculoDto>>("/api/veiculos?status=historico");
-        Assert.Contains(historico!, v => v.Placa == placa);
+        var historico = await cliente.GetFromJsonAsync<List<VeiculoDto>>("/api/veiculos?status=historico", OpcoesJson);
+        Assert.Contains(historico!, v => v.Placa == placa && v.FormaPagamento == EstacionamentoDIO.Domain.Entities.FormaPagamento.Pix);
     }
 
     [Fact]

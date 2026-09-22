@@ -4,14 +4,14 @@ import { formatarDataHora, formatarTempoDecorrido } from '../utils/format'
 
 interface VeiculosEstacionadosTableProps {
   veiculos: Veiculo[]
-  onRegistrarSaida: (placa: string) => void
+  onAbrirPagamento: (placa: string) => void
   placasProcessando: Set<string>
   carregando: boolean
 }
 
 export function VeiculosEstacionadosTable({
   veiculos,
-  onRegistrarSaida,
+  onAbrirPagamento,
   placasProcessando,
   carregando,
 }: VeiculosEstacionadosTableProps) {
@@ -70,7 +70,7 @@ export function VeiculosEstacionadosTable({
                   <button
                     type="button"
                     disabled={processando}
-                    onClick={() => onRegistrarSaida(veiculo.placa)}
+                    onClick={() => onAbrirPagamento(veiculo.placa)}
                     className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {processando && (

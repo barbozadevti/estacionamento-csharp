@@ -1,3 +1,5 @@
+using EstacionamentoDIO.Domain.Entities;
+
 namespace EstacionamentoDIO.Application;
 
 public record VeiculoDto(
@@ -5,7 +7,8 @@ public record VeiculoDto(
     string Placa,
     DateTime HoraEntrada,
     DateTime? HoraSaida,
-    decimal? ValorCobrado);
+    decimal? ValorCobrado,
+    FormaPagamento? FormaPagamento);
 
 public record StatusEstacionamentoDto(
     int VagasTotais,
@@ -16,4 +19,5 @@ public record StatusEstacionamentoDto(
 public record RegistrarSaidaResultDto(
     VeiculoDto Veiculo,
     decimal ValorCobrado,
-    int Horas);
+    int Horas,
+    FormaPagamento FormaPagamento);

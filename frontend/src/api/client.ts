@@ -1,5 +1,6 @@
 import type {
   ApiErrorBody,
+  FormaPagamento,
   RegistrarSaidaResposta,
   StatusEstacionamento,
   Veiculo,
@@ -81,8 +82,12 @@ export function registrarEntrada(placa: string): Promise<Veiculo> {
   })
 }
 
-export function registrarSaida(placa: string): Promise<RegistrarSaidaResposta> {
+export function registrarSaida(
+  placa: string,
+  formaPagamento: FormaPagamento,
+): Promise<RegistrarSaidaResposta> {
   return request<RegistrarSaidaResposta>(`/veiculos/${encodeURIComponent(placa)}/saida`, {
     method: 'POST',
+    body: JSON.stringify({ formaPagamento }),
   })
 }

@@ -35,7 +35,7 @@ public class VeiculoTests
         var veiculo = new Veiculo("ABC1234", entrada);
         var saida = entrada.AddMinutes(minutosEstacionado);
 
-        var horas = veiculo.RegistrarSaida(saida, precoInicial: 5m, precoPorHora: 2m);
+        var horas = veiculo.RegistrarSaida(saida, precoInicial: 5m, precoPorHora: 2m, FormaPagamento.Pix);
 
         Assert.Equal(horasEsperadas, horas);
         Assert.Equal(5m + 2m * horasEsperadas, veiculo.ValorCobrado);
@@ -44,11 +44,21 @@ public class VeiculoTests
     }
 
     [Fact]
+    public void RegistrarSaida_DeveRegistrarFormaDePagamento()
+    {
+        var veiculo = new Veiculo("ABC1234", DateTime.UtcNow);
+
+        veiculo.RegistrarSaida(DateTime.UtcNow.AddHours(1), 5m, 2m, FormaPagamento.CartaoCredito);
+
+        Assert.Equal(FormaPagamento.CartaoCredito, veiculo.FormaPagamento);
+    }
+
+    [Fact]
     public void RegistrarSaida_QuandoJaSaiu_DeveLancarExcecao()
     {
         var veiculo = new Veiculo("ABC1234", DateTime.UtcNow);
-        veiculo.RegistrarSaida(DateTime.UtcNow.AddHours(1), 5m, 2m);
+        veiculo.RegistrarSaida(DateTime.UtcNow.AddHours(1), 5m, 2m, FormaPagamento.Dinheiro);
 
-        Assert.Throws<InvalidOperationException>(() => veiculo.RegistrarSaida(DateTime.UtcNow.AddHours(2), 5m, 2m));
+        Assert.Throws<InvalidOperationException>(() => veiculo.RegistrarSaida(DateTime.UtcNow.AddHours(2), 5m, 2m, FormaPagamento.Dinheiro));
     }
 }

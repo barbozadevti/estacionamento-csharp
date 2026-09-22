@@ -65,7 +65,7 @@ public class EstacionamentoAppServiceTests
         var relogio = new FakeRelogio(DateTime.UtcNow);
         var servico = CriarServico(repositorio, relogio);
 
-        await Assert.ThrowsAsync<VeiculoNaoEncontradoException>(() => servico.RegistrarSaidaAsync("ABC1234"));
+        await Assert.ThrowsAsync<VeiculoNaoEncontradoException>(() => servico.RegistrarSaidaAsync("ABC1234", FormaPagamento.Pix));
     }
 
     [Fact]
@@ -77,10 +77,12 @@ public class EstacionamentoAppServiceTests
         await servico.RegistrarEntradaAsync("ABC1234");
 
         relogio.Avancar(TimeSpan.FromHours(2.5));
-        var resultado = await servico.RegistrarSaidaAsync("abc1234");
+        var resultado = await servico.RegistrarSaidaAsync("abc1234", FormaPagamento.Pix);
 
         Assert.Equal(3, resultado.Horas);
         Assert.Equal(5m + 2m * 3, resultado.ValorCobrado);
+        Assert.Equal(FormaPagamento.Pix, resultado.FormaPagamento);
+        Assert.Equal(FormaPagamento.Pix, resultado.Veiculo.FormaPagamento);
 
         var status = await servico.ObterStatusAsync();
         Assert.Equal(status.VagasTotais, status.VagasDisponiveis);

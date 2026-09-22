@@ -9,6 +9,7 @@ public class Veiculo
     public DateTime HoraEntrada { get; private set; }
     public DateTime? HoraSaida { get; private set; }
     public decimal? ValorCobrado { get; private set; }
+    public FormaPagamento? FormaPagamento { get; private set; }
 
     public bool EstaEstacionado => HoraSaida is null;
 
@@ -27,7 +28,7 @@ public class Veiculo
         HoraEntrada = horaEntrada;
     }
 
-    public int RegistrarSaida(DateTime horaSaida, decimal precoInicial, decimal precoPorHora)
+    public int RegistrarSaida(DateTime horaSaida, decimal precoInicial, decimal precoPorHora, FormaPagamento formaPagamento)
     {
         if (!EstaEstacionado)
         {
@@ -38,6 +39,7 @@ public class Veiculo
 
         HoraSaida = horaSaida;
         ValorCobrado = precoInicial + (precoPorHora * horas);
+        FormaPagamento = formaPagamento;
 
         return horas;
     }

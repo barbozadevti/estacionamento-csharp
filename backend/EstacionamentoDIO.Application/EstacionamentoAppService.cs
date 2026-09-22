@@ -50,16 +50,16 @@ public class EstacionamentoAppService : IEstacionamentoAppService
         return ParaDto(veiculo);
     }
 
-    public async Task<RegistrarSaidaResultDto> RegistrarSaidaAsync(string placa, CancellationToken cancellationToken = default)
+    public async Task<RegistrarSaidaResultDto> RegistrarSaidaAsync(string placa, FormaPagamento formaPagamento, CancellationToken cancellationToken = default)
     {
         var placaNormalizada = Placas.Normalizar(placa);
         var veiculo = await repositorio.ObterEstacionadoPorPlacaAsync(placaNormalizada, cancellationToken)
             ?? throw new VeiculoNaoEncontradoException(placaNormalizada);
 
-        var horas = veiculo.RegistrarSaida(relogio.AgoraUtc, opcoes.PrecoInicial, opcoes.PrecoPorHora);
+        var horas = veiculo.RegistrarSaida(relogio.AgoraUtc, opcoes.PrecoInicial, opcoes.PrecoPorHora, formaPagamento);
         await repositorio.SalvarAlteracoesAsync(cancellationToken);
 
-        return new RegistrarSaidaResultDto(ParaDto(veiculo), veiculo.ValorCobrado!.Value, horas);
+        return new RegistrarSaidaResultDto(ParaDto(veiculo), veiculo.ValorCobrado!.Value, horas, formaPagamento);
     }
 
     public async Task<List<VeiculoDto>> ListarEstacionadosAsync(CancellationToken cancellationToken = default)
@@ -89,5 +89,6 @@ public class EstacionamentoAppService : IEstacionamentoAppService
         veiculo.Placa,
         veiculo.HoraEntrada,
         veiculo.HoraSaida,
-        veiculo.ValorCobrado);
+        veiculo.ValorCobrado,
+        veiculo.FormaPagamento);
 }

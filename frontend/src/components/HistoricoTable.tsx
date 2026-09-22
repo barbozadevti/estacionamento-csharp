@@ -1,4 +1,4 @@
-import type { Veiculo } from '../types/estacionamento'
+import { rotuloFormaPagamento, type Veiculo } from '../types/estacionamento'
 import { formatarDataHora, formatarMoeda } from '../utils/format'
 
 interface HistoricoTableProps {
@@ -37,6 +37,9 @@ export function HistoricoTable({ veiculos, carregando }: HistoricoTableProps) {
             <th scope="col" className="px-4 py-3 font-semibold">
               Saída
             </th>
+            <th scope="col" className="px-4 py-3 font-semibold">
+              Pagamento
+            </th>
             <th scope="col" className="px-4 py-3 text-right font-semibold">
               Valor cobrado
             </th>
@@ -51,6 +54,11 @@ export function HistoricoTable({ veiculos, carregando }: HistoricoTableProps) {
               <td className="px-4 py-3 text-slate-600">{formatarDataHora(veiculo.horaEntrada)}</td>
               <td className="px-4 py-3 text-slate-600">
                 {veiculo.horaSaida ? formatarDataHora(veiculo.horaSaida) : '—'}
+              </td>
+              <td className="px-4 py-3">
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+                  {rotuloFormaPagamento(veiculo.formaPagamento)}
+                </span>
               </td>
               <td className="px-4 py-3 text-right font-semibold tabular-nums text-slate-800">
                 {veiculo.valorCobrado !== null ? formatarMoeda(veiculo.valorCobrado) : '—'}

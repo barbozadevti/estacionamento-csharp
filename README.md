@@ -40,6 +40,10 @@ frontend/
 - **Frontend**: React + TypeScript, Vite, Tailwind CSS
 - **Infraestrutura**: Docker + Docker Compose
 
+### Formas de pagamento
+
+Na saída, o operador escolhe a forma de pagamento (Pix, cartão de crédito, cartão de débito, carteira digital ou dinheiro), incluindo um QR Code Pix simulado. É um fluxo **de demonstração**: não há integração com nenhum gateway de pagamento real, nenhuma cobrança é processada — o objetivo é registrar como o cliente pagou, como o caixa de qualquer estacionamento faria.
+
 ### Como rodar tudo com Docker (recomendado)
 
 ```bash

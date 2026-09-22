@@ -1,4 +1,5 @@
 using EstacionamentoDIO.Application;
+using EstacionamentoDIO.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EstacionamentoDIO.Api.Controllers;
@@ -45,13 +46,17 @@ public class VeiculosController : ControllerBase
     [HttpPost("{placa}/saida")]
     [ProducesResponseType(typeof(RegistrarSaidaResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<RegistrarSaidaResultDto>> RegistrarSaida(
         string placa,
+        [FromBody] RegistrarSaidaRequest request,
         CancellationToken cancellationToken)
     {
-        var resultado = await servico.RegistrarSaidaAsync(placa, cancellationToken);
+        var resultado = await servico.RegistrarSaidaAsync(placa, request.FormaPagamento, cancellationToken);
         return Ok(resultado);
     }
 }
 
 public record RegistrarEntradaRequest(string Placa);
+
+public record RegistrarSaidaRequest(FormaPagamento FormaPagamento);
