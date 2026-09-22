@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>EstacionamentoDIO</AssemblyName>
+    <RootNamespace>EstacionamentoDIO</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EstacionamentoDIO.Core\EstacionamentoDIO.Core.csproj" />
+  </ItemGroup>
+
+</Project>

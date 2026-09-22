@@ -4,22 +4,37 @@ Desafio de projeto do bootcamp da [DIO](https://www.dio.me/): construção de um
 
 ## Funcionalidades
 
-- **Adicionar veículo**: registra a placa de um veículo que está entrando no estacionamento.
-- **Remover veículo**: registra a saída de um veículo, calculando o valor a pagar com base em um preço inicial fixo mais um valor por hora de permanência.
-- **Listar veículos**: exibe todos os veículos atualmente estacionados.
+- **Adicionar veículo**: registra a placa e a hora de entrada (`DateTime.Now`) de um veículo.
+- **Remover veículo**: registra a saída, calculando o valor a pagar com base em um preço inicial fixo mais um valor por hora de permanência (hora parcial é cobrada como hora cheia).
+- **Listar veículos**: exibe todos os veículos atualmente estacionados, com o horário de entrada.
+- **Limite de vagas**: o estacionamento tem uma capacidade máxima configurável; ao lotar, novas entradas são recusadas.
+- **Persistência em arquivo**: os veículos estacionados são salvos em `estacionamento.json`, então os dados não se perdem ao fechar o programa.
 
 ## Tecnologias
 
-- C#
-- .NET 9 (Console Application)
+- C# / .NET 9
+- xUnit (testes automatizados)
+
+## Estrutura do projeto
+
+```
+estacionamento-csharp/
+├── EstacionamentoDIO.sln
+├── src/
+│   ├── EstacionamentoDIO.Core/      # regras de negócio (Estacionamento, Veiculo)
+│   └── EstacionamentoDIO.Console/   # aplicação de console (menu e interação com o usuário)
+└── tests/
+    └── EstacionamentoDIO.Tests/     # testes automatizados (xUnit)
+```
 
 ## Como executar
 
 ```bash
-dotnet run
+dotnet run --project src/EstacionamentoDIO.Console
 ```
 
-## Estrutura
+## Como rodar os testes
 
-- `Program.cs`: menu principal e loop de interação com o usuário.
-- `Estacionamento.cs`: classe com a lógica de negócio (adicionar, remover e listar veículos).
+```bash
+dotnet test
+```
