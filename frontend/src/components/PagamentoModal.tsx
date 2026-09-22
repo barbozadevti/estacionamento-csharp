@@ -1,14 +1,21 @@
 import { useState } from 'react'
-import { FORMAS_PAGAMENTO, type FormaPagamento } from '../types/estacionamento'
+import { FORMAS_PAGAMENTO, type Estabelecimento, type FormaPagamento } from '../types/estacionamento'
 
 interface PagamentoModalProps {
   placa: string
   processando: boolean
+  estabelecimento: Estabelecimento | null
   onConfirmar: (forma: FormaPagamento) => void
   onFechar: () => void
 }
 
-export function PagamentoModal({ placa, processando, onConfirmar, onFechar }: PagamentoModalProps) {
+export function PagamentoModal({
+  placa,
+  processando,
+  estabelecimento,
+  onConfirmar,
+  onFechar,
+}: PagamentoModalProps) {
   const [formaSelecionada, setFormaSelecionada] = useState<FormaPagamento | null>(null)
 
   function handleSelecionar(forma: FormaPagamento) {
@@ -38,6 +45,13 @@ export function PagamentoModal({ placa, processando, onConfirmar, onFechar }: Pa
         {formaSelecionada === 'Pix' ? (
           <div className="mt-4 flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
             <QrCodeSimulado />
+            {estabelecimento && (
+              <p className="text-center text-xs font-medium text-slate-600">
+                Recebedor: {estabelecimento.nome}
+                <br />
+                <span className="font-normal text-slate-400">CNPJ {estabelecimento.cnpj}</span>
+              </p>
+            )}
             <p className="text-center text-xs text-slate-500">
               QR Code Pix simulado — projeto de demonstração, nenhuma cobrança real é feita.
             </p>

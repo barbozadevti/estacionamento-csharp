@@ -21,3 +21,5 @@ public record RegistrarSaidaResultDto(
     decimal ValorCobrado,
     int Horas,
     FormaPagamento FormaPagamento);
+
+public record EstabelecimentoDto(string Nome, string Cnpj);

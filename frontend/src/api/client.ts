@@ -1,5 +1,6 @@
 import type {
   ApiErrorBody,
+  Estabelecimento,
   FormaPagamento,
   RegistrarSaidaResposta,
   StatusEstacionamento,
@@ -65,6 +66,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function buscarStatus(): Promise<StatusEstacionamento> {
   return request<StatusEstacionamento>('/estacionamento/status')
+}
+
+export function buscarEstabelecimento(): Promise<Estabelecimento> {
+  return request<Estabelecimento>('/estabelecimento')
 }
 
 export function listarVeiculosEstacionados(): Promise<Veiculo[]> {

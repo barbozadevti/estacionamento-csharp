@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ApiError, buscarStatus, listarHistoricoVeiculos, listarVeiculosEstacionados, registrarEntrada, registrarSaida } from './api/client'
+import {
+  ApiError,
+  buscarEstabelecimento,
+  buscarStatus,
+  listarHistoricoVeiculos,
+  listarVeiculosEstacionados,
+  registrarEntrada,
+  registrarSaida,
+} from './api/client'
 import { EntradaForm } from './components/EntradaForm'
 import { ErroConexaoBanner } from './components/ErroConexaoBanner'
 import { Header } from './components/Header'
@@ -9,7 +17,7 @@ import { StatusCards } from './components/StatusCards'
 import { Tabs, type Aba } from './components/Tabs'
 import { Toast, type ToastData } from './components/Toast'
 import { VeiculosEstacionadosTable } from './components/VeiculosEstacionadosTable'
-import type { FormaPagamento, StatusEstacionamento, Veiculo } from './types/estacionamento'
+import type { Estabelecimento, FormaPagamento, StatusEstacionamento, Veiculo } from './types/estacionamento'
 import { rotuloFormaPagamento } from './types/estacionamento'
 import { formatarMoeda } from './utils/format'
 
@@ -20,6 +28,7 @@ function mensagemDeErro(err: unknown, fallback: string): string {
 }
 
 function App() {
+  const [estabelecimento, setEstabelecimento] = useState<Estabelecimento | null>(null)
   const [status, setStatus] = useState<StatusEstacionamento | null>(null)
   const [veiculosEstacionados, setVeiculosEstacionados] = useState<Veiculo[]>([])
   const [historico, setHistorico] = useState<Veiculo[]>([])
@@ -59,6 +68,15 @@ function App() {
     } finally {
       setCarregandoHistorico(false)
     }
+  }, [])
+
+  // Dados do estabelecimento raramente mudam; busca uma vez só, sem entrar no poll.
+  useEffect(() => {
+    buscarEstabelecimento()
+      .then(setEstabelecimento)
+      .catch(() => {
+        // Falha silenciosa: o cabeçalho cai para o nome genérico se a API não responder.
+      })
   }, [])
 
   // Carregamento inicial dos dados principais.
@@ -128,7 +146,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <Header />
+      <Header estabelecimento={estabelecimento} />
 
       <main className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6">
         {erroConexao && (
@@ -164,6 +182,7 @@ function App() {
         <PagamentoModal
           placa={placaEmPagamento}
           processando={placasProcessando.has(placaEmPagamento)}
+          estabelecimento={estabelecimento}
           onConfirmar={(forma) => handleConfirmarPagamento(placaEmPagamento, forma)}
           onFechar={() => setPlacaEmPagamento(null)}
         />

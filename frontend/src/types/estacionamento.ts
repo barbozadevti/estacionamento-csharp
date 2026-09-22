@@ -35,6 +35,11 @@ export interface RegistrarSaidaResposta {
   formaPagamento: FormaPagamento
 }
 
+export interface Estabelecimento {
+  nome: string
+  cnpj: string
+}
+
 export interface ApiErrorBody {
   message: string
 }
