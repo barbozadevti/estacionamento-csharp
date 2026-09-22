@@ -4,3 +4,12 @@ obj/
 *.user
 estacionamento.json
 publish/
+*.db
+*.db-shm
+*.db-wal
+
+# frontend
+node_modules/
+dist/
+.env
+.env.local

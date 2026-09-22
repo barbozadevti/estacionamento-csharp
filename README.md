@@ -1,49 +1,94 @@
-# Sistema de Estacionamento em C#
+# Sistema de Estacionamento
 
-Desafio de projeto do bootcamp da [DIO](https://www.dio.me/): construção de um sistema de controle de estacionamento em C#/.NET, com duas interfaces sobre a mesma lógica de negócio: console e desktop (Windows Forms).
+Projeto iniciado como desafio de projeto do bootcamp da [DIO](https://www.dio.me/) ("Construindo um Sistema para um Estacionamento com C#") e evoluído, com uma sessão enxuta de [Lean Inception](docs/lean-inception.md), para um sistema completo: API REST em ASP.NET Core (Clean Architecture), banco de dados, frontend web em React e empacotamento com Docker.
 
-## Funcionalidades
+O repositório guarda as três fases da evolução do projeto lado a lado:
 
-- **Adicionar veículo**: registra a placa e a hora de entrada (`DateTime.Now`) de um veículo.
-- **Remover veículo**: registra a saída, calculando o valor a pagar com base em um preço inicial fixo mais um valor por hora de permanência (hora parcial é cobrada como hora cheia).
-- **Listar veículos**: exibe todos os veículos atualmente estacionados, com o horário de entrada (na versão desktop, o tempo estacionado é atualizado ao vivo).
-- **Limite de vagas**: o estacionamento tem uma capacidade máxima configurável; ao lotar, novas entradas são recusadas.
-- **Persistência em arquivo**: os veículos estacionados são salvos em JSON, então os dados não se perdem ao fechar o programa.
+| Versão | Pasta | Descrição |
+|---|---|---|
+| Desafio original (console) | [`src/EstacionamentoDIO.Console`](src/EstacionamentoDIO.Console) | Entrega original do desafio da DIO, em memória |
+| Desktop (Windows Forms) | [`src/EstacionamentoDIO.Gui`](src/EstacionamentoDIO.Gui) | Evolução com interface gráfica e persistência em JSON |
+| **Sistema completo (API + Web)** | [`backend/`](backend) e [`frontend/`](frontend) | Versão atual: arquitetura em camadas, banco de dados real e frontend web |
 
-## Tecnologias
+Veja o raciocínio por trás dessa evolução em [`docs/lean-inception.md`](docs/lean-inception.md).
 
-- C# / .NET 9
-- Windows Forms (interface gráfica desktop)
-- xUnit (testes automatizados)
+## Sistema completo (API + Web)
 
-## Estrutura do projeto
+### Arquitetura
 
 ```
-estacionamento-csharp/
-├── EstacionamentoDIO.sln
-├── src/
-│   ├── EstacionamentoDIO.Core/      # regras de negócio (Estacionamento, Veiculo)
-│   ├── EstacionamentoDIO.Console/   # aplicação de console (menu e interação com o usuário)
-│   └── EstacionamentoDIO.Gui/       # aplicação desktop com interface gráfica (Windows Forms)
+backend/
+├── EstacionamentoDIO.Domain/          # entidades, regras de negócio, exceções (sem dependências externas)
+├── EstacionamentoDIO.Application/     # casos de uso, DTOs, interfaces
+├── EstacionamentoDIO.Infrastructure/  # EF Core + SQLite, repositórios
+├── EstacionamentoDIO.Api/             # controllers, Swagger, injeção de dependência
 └── tests/
-    └── EstacionamentoDIO.Tests/     # testes automatizados (xUnit)
+    ├── EstacionamentoDIO.Domain.Tests/  # testes de domínio e de casos de uso
+    └── EstacionamentoDIO.Api.Tests/     # testes de integração (WebApplicationFactory)
+
+frontend/
+├── src/
+│   ├── api/          # cliente HTTP tipado
+│   ├── components/    # componentes da UI (cards de status, tabelas, formulário)
+│   └── App.tsx         # painel operacional
+└── Dockerfile
 ```
 
-## Como executar
+### Tecnologias
 
-Versão console:
+- **Backend**: C# / .NET 9, ASP.NET Core Web API, Entity Framework Core + SQLite, Swagger/OpenAPI, xUnit
+- **Frontend**: React + TypeScript, Vite, Tailwind CSS
+- **Infraestrutura**: Docker + Docker Compose
+
+### Como rodar tudo com Docker (recomendado)
+
+```bash
+docker compose up --build
+```
+
+- API: http://localhost:5080/swagger
+- Frontend: http://localhost:3000
+
+### Como rodar localmente (sem Docker)
+
+Backend:
+
+```bash
+cd backend
+dotnet run --project EstacionamentoDIO.Api
+```
+
+A API sobe em `http://localhost:5080` (Swagger em `/swagger`) e aplica as migrations do EF Core automaticamente na primeira execução.
+
+Frontend:
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+### Como rodar os testes do backend
+
+```bash
+cd backend
+dotnet test
+```
+
+## Desafio original: console (.NET)
 
 ```bash
 dotnet run --project src/EstacionamentoDIO.Console
 ```
 
-Versão com interface gráfica (Windows):
+## Versão desktop (Windows Forms)
 
 ```bash
 dotnet run --project src/EstacionamentoDIO.Gui
 ```
 
-## Como rodar os testes
+Testes do console/desktop (usa `EstacionamentoDIO.sln`, na raiz):
 
 ```bash
 dotnet test
