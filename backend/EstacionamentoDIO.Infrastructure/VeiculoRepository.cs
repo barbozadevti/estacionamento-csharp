@@ -30,6 +30,12 @@ public class VeiculoRepository : IVeiculoRepository
             .OrderByDescending(v => v.HoraSaida)
             .ToListAsync(cancellationToken);
 
+    public Task<List<Veiculo>> ListarSaidasNoPeriodoAsync(DateTime inicioUtc, DateTime fimUtc, CancellationToken cancellationToken = default) =>
+        contexto.Veiculos
+            .Where(v => v.HoraSaida != null && v.HoraSaida >= inicioUtc && v.HoraSaida < fimUtc)
+            .OrderByDescending(v => v.HoraSaida)
+            .ToListAsync(cancellationToken);
+
     public Task<int> ContarEstacionadosAsync(CancellationToken cancellationToken = default) =>
         contexto.Veiculos.CountAsync(v => v.HoraSaida == null, cancellationToken);
 

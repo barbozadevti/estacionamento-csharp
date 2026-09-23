@@ -8,11 +8,14 @@ import {
   registrarEntrada,
   registrarSaida,
 } from './api/client'
+import { conectarTempoReal, type StatusConexao } from './api/realtime'
+import { ConexaoIndicador } from './components/ConexaoIndicador'
 import { EntradaForm } from './components/EntradaForm'
 import { ErroConexaoBanner } from './components/ErroConexaoBanner'
 import { Header } from './components/Header'
 import { HistoricoTable } from './components/HistoricoTable'
 import { PagamentoModal } from './components/PagamentoModal'
+import { RelatorioPanel } from './components/RelatorioPanel'
 import { StatusCards } from './components/StatusCards'
 import { Tabs, type Aba } from './components/Tabs'
 import { Toast, type ToastData } from './components/Toast'
@@ -21,7 +24,9 @@ import type { Estabelecimento, FormaPagamento, StatusEstacionamento, Veiculo } f
 import { rotuloFormaPagamento } from './types/estacionamento'
 import { formatarMoeda } from './utils/format'
 
-const INTERVALO_POLL_MS = 9000
+// O SignalR mantém tudo sincronizado em tempo real; o poll fica só como
+// rede de segurança caso a conexão em tempo real caia silenciosamente.
+const INTERVALO_POLL_MS = 30000
 
 function mensagemDeErro(err: unknown, fallback: string): string {
   return err instanceof ApiError ? err.message : fallback
@@ -40,6 +45,7 @@ function App() {
   const [placasProcessando, setPlacasProcessando] = useState<Set<string>>(new Set())
   const [toast, setToast] = useState<ToastData | null>(null)
   const [placaEmPagamento, setPlacaEmPagamento] = useState<string | null>(null)
+  const [statusConexao, setStatusConexao] = useState<StatusConexao>('conectando')
 
   const carregarPrincipal = useCallback(async () => {
     try {
@@ -91,7 +97,7 @@ function App() {
     }
   }, [abaAtiva, carregarHistorico])
 
-  // Poll periódico para manter os dados sincronizados com o servidor.
+  // Poll periódico, como rede de segurança caso o tempo real caia silenciosamente.
   useEffect(() => {
     const id = window.setInterval(() => {
       carregarPrincipal()
@@ -101,6 +107,29 @@ function App() {
     }, INTERVALO_POLL_MS)
     return () => window.clearInterval(id)
   }, [carregarPrincipal, carregarHistorico, abaAtiva])
+
+  // Conexão em tempo real: outro operador registrando entrada/saída aparece
+  // instantaneamente aqui, sem esperar o próximo poll.
+  useEffect(() => {
+    const desconectar = conectarTempoReal({
+      onStatusConexaoMudou: setStatusConexao,
+      onVeiculoEntrou: (veiculo, statusAtualizado) => {
+        setStatus(statusAtualizado)
+        setVeiculosEstacionados((prev) =>
+          prev.some((v) => v.id === veiculo.id) ? prev : [veiculo, ...prev],
+        )
+      },
+      onVeiculoSaiu: (resultado, statusAtualizado) => {
+        setStatus(statusAtualizado)
+        setVeiculosEstacionados((prev) => prev.filter((v) => v.id !== resultado.veiculo.id))
+        setHistorico((prev) =>
+          prev.some((v) => v.id === resultado.veiculo.id) ? prev : [resultado.veiculo, ...prev],
+        )
+      },
+    })
+
+    return desconectar
+  }, [])
 
   async function handleRegistrarEntrada(placa: string) {
     try {
@@ -157,25 +186,30 @@ function App() {
 
         <EntradaForm onRegistrar={handleRegistrarEntrada} desabilitado={carregandoInicial} />
 
-        <Tabs
-          abaAtiva={abaAtiva}
-          onMudarAba={setAbaAtiva}
-          totalEstacionados={veiculosEstacionados.length}
-        />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Tabs
+            abaAtiva={abaAtiva}
+            onMudarAba={setAbaAtiva}
+            totalEstacionados={veiculosEstacionados.length}
+          />
+          <ConexaoIndicador status={statusConexao} />
+        </div>
 
-        {abaAtiva === 'estacionados' ? (
+        {abaAtiva === 'estacionados' && (
           <VeiculosEstacionadosTable
             veiculos={veiculosEstacionados}
             onAbrirPagamento={setPlacaEmPagamento}
             placasProcessando={placasProcessando}
             carregando={carregandoInicial}
           />
-        ) : (
+        )}
+        {abaAtiva === 'historico' && (
           <HistoricoTable
             veiculos={historico}
             carregando={carregandoHistorico && historico.length === 0}
           />
         )}
+        {abaAtiva === 'relatorio' && <RelatorioPanel />}
       </main>
 
       {placaEmPagamento && (

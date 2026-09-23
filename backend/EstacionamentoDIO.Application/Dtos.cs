@@ -23,3 +23,15 @@ public record RegistrarSaidaResultDto(
     FormaPagamento FormaPagamento);
 
 public record EstabelecimentoDto(string Nome, string Cnpj);
+
+public record FaturamentoPorFormaPagamentoDto(
+    FormaPagamento FormaPagamento,
+    int Quantidade,
+    decimal Total);
+
+public record RelatorioFaturamentoDto(
+    DateTime Inicio,
+    DateTime Fim,
+    int TotalVeiculos,
+    decimal TotalArrecadado,
+    List<FaturamentoPorFormaPagamentoDto> PorFormaPagamento);

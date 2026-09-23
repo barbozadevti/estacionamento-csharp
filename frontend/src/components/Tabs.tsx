@@ -1,4 +1,4 @@
-export type Aba = 'estacionados' | 'historico'
+export type Aba = 'estacionados' | 'historico' | 'relatorio'
 
 interface TabsProps {
   abaAtiva: Aba
@@ -10,6 +10,7 @@ export function Tabs({ abaAtiva, onMudarAba, totalEstacionados }: TabsProps) {
   const abas: { id: Aba; label: string; contagem?: number }[] = [
     { id: 'estacionados', label: 'Estacionados', contagem: totalEstacionados },
     { id: 'historico', label: 'Histórico' },
+    { id: 'relatorio', label: 'Relatório' },
   ]
 
   return (

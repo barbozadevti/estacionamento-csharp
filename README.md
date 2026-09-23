@@ -36,13 +36,16 @@ frontend/
 
 ### Tecnologias
 
-- **Backend**: C# / .NET 9, ASP.NET Core Web API, Entity Framework Core + SQLite, Swagger/OpenAPI, xUnit
-- **Frontend**: React + TypeScript, Vite, Tailwind CSS
+- **Backend**: C# / .NET 9, ASP.NET Core Web API, Entity Framework Core + SQLite, SignalR, Swagger/OpenAPI, xUnit
+- **Frontend**: React + TypeScript, Vite, Tailwind CSS, SignalR client
 - **Infraestrutura**: Docker + Docker Compose
 
-### Formas de pagamento
+### Funcionalidades
 
-Na saída, o operador escolhe a forma de pagamento (Pix, cartão de crédito, cartão de débito, carteira digital ou dinheiro), incluindo um QR Code Pix simulado. É um fluxo **de demonstração**: não há integração com nenhum gateway de pagamento real, nenhuma cobrança é processada — o objetivo é registrar como o cliente pagou, como o caixa de qualquer estacionamento faria.
+- **Operacional**: entrada/saída de veículos, vagas disponíveis, histórico, formas de pagamento (Pix com QR Code simulado, cartão de crédito/débito, carteira digital, dinheiro) — sem integração com gateway de pagamento real, é um fluxo de demonstração.
+- **Tempo real**: o painel atualiza instantaneamente via WebSocket (SignalR) quando qualquer operador registra uma entrada ou saída, sem precisar dar refresh. O indicador "Ao vivo" no topo mostra o status da conexão; o polling a cada 30s fica só como rede de segurança.
+- **Relatório de faturamento**: aba "Relatório" com total arrecadado e detalhamento por forma de pagamento, filtrando por hoje / últimos 7 dias / últimos 30 dias.
+- **Health check**: `/health` para monitoramento e orquestração (Docker, load balancer etc.).
 
 ### Como rodar tudo com Docker (recomendado)
 

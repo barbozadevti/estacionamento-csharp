@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using EstacionamentoDIO.Api.Hubs;
 using EstacionamentoDIO.Api.Middleware;
 using EstacionamentoDIO.Application;
 using EstacionamentoDIO.Infrastructure;
@@ -29,6 +30,12 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificadorEventos, SignalRNotificadorEventos>();
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<EstacionamentoDbContext>("banco-de-dados");
 
 builder.Services.AddCors(options =>
 {
@@ -65,6 +72,8 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+app.MapHub<EstacionamentoHub>("/hubs/estacionamento");
+app.MapHealthChecks("/health");
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
 

@@ -28,7 +28,8 @@ Ir além do desafio original da DIO e entregar um sistema de gestão de estacion
 | Must have | Exibir vagas disponíveis / total |
 | Should have | Histórico de saídas (veículos que já saíram) |
 | Should have | Persistência real em banco de dados (não em arquivo/memória) |
-| Could have | Relatório de faturamento por período |
+| Should have ✅ | Relatório de faturamento por período (feito na 2ª iteração) |
+| Should have ✅ | Atualização em tempo real via WebSocket, não só polling (feito na 2ª iteração) |
 | Could have | Autenticação de operador |
 | Won't have (por ora) | Múltiplos estacionamentos/unidades |
 
@@ -38,6 +39,15 @@ Ir além do desafio original da DIO e entregar um sistema de gestão de estacion
 - **Frontend**: painel web em React + TypeScript, consumindo a API, com atualização em tempo real do tempo estacionado.
 - **Empacotamento**: Docker + docker-compose, para subir backend e frontend com um único comando.
 - **Testes**: testes automatizados cobrindo as regras de negócio (Domain/Application) e os endpoints principais da API.
+
+## 5.1 Segunda iteração — comparação com o mercado
+
+Depois do MVP, uma nova rodada de análise (o mesmo espírito do Lean Inception: revisitar o backlog à luz do que já existe no mercado) revelou duas lacunas:
+
+- **A persona "Gestor" não tinha nenhuma tela.** O MVP entregou tudo para o Operador, mas nada para quem "acompanha quanto foi arrecadado" — um relatório de faturamento (por forma de pagamento e por período) resolve isso.
+- **Painéis operacionais reais (Estapar, Zul, sistemas de estacionamento hospitalar) atualizam instantaneamente** quando um carro entra ou sai — não ficam esperando um poll a cada alguns segundos. Trocamos parte do polling por WebSocket (SignalR), com o poll mantido apenas como rede de segurança.
+
+Também foram adicionados, como padrão esperado em uma API de produção hoje em dia: health check (`/health`) para orquestração/monitoramento, e formas de pagamento modernas (Pix, cartão, carteira digital) na saída.
 
 ## 6. Fora do escopo (próximos passos)
 

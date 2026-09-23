@@ -20,7 +20,7 @@ public class EstacionamentoAppServiceTests
             PrecoPorHora = 2m,
         });
 
-        return new EstacionamentoAppService(repositorio, relogio, opcoes);
+        return new EstacionamentoAppService(repositorio, relogio, new NotificadorEventosNulo(), opcoes);
     }
 
     [Fact]
@@ -88,6 +88,41 @@ public class EstacionamentoAppServiceTests
         Assert.Equal(status.VagasTotais, status.VagasDisponiveis);
     }
 
+    [Fact]
+    public async Task ObterRelatorioFaturamentoAsync_DeveAgruparPorFormaDePagamento()
+    {
+        var repositorio = new FakeVeiculoRepository();
+        var relogio = new FakeRelogio(new DateTime(2026, 1, 1, 8, 0, 0, DateTimeKind.Utc));
+        var servico = CriarServico(repositorio, relogio, vagasTotais: 5);
+
+        await servico.RegistrarEntradaAsync("ABC1234");
+        relogio.Avancar(TimeSpan.FromHours(1));
+        await servico.RegistrarSaidaAsync("ABC1234", FormaPagamento.Pix); // 5 + 2*1 = 7
+
+        await servico.RegistrarEntradaAsync("XYZ9876");
+        relogio.Avancar(TimeSpan.FromHours(2));
+        await servico.RegistrarSaidaAsync("XYZ9876", FormaPagamento.Pix); // 5 + 2*2 = 9
+
+        await servico.RegistrarEntradaAsync("QWE4567");
+        relogio.Avancar(TimeSpan.FromHours(1));
+        await servico.RegistrarSaidaAsync("QWE4567", FormaPagamento.CartaoCredito); // 5 + 2*1 = 7
+
+        var relatorio = await servico.ObterRelatorioFaturamentoAsync(
+            new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc));
+
+        Assert.Equal(3, relatorio.TotalVeiculos);
+        Assert.Equal(23m, relatorio.TotalArrecadado);
+
+        var pix = relatorio.PorFormaPagamento.Single(f => f.FormaPagamento == FormaPagamento.Pix);
+        Assert.Equal(2, pix.Quantidade);
+        Assert.Equal(16m, pix.Total);
+
+        var credito = relatorio.PorFormaPagamento.Single(f => f.FormaPagamento == FormaPagamento.CartaoCredito);
+        Assert.Equal(1, credito.Quantidade);
+        Assert.Equal(7m, credito.Total);
+    }
+
     private class FakeRelogio : IRelogio
     {
         public FakeRelogio(DateTime inicial) => AgoraUtc = inicial;
@@ -107,6 +142,9 @@ public class EstacionamentoAppServiceTests
 
         public Task<List<Veiculo>> ListarHistoricoAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(Veiculos.Where(v => !v.EstaEstacionado).ToList());
+
+        public Task<List<Veiculo>> ListarSaidasNoPeriodoAsync(DateTime inicioUtc, DateTime fimUtc, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Veiculos.Where(v => v.HoraSaida is not null && v.HoraSaida >= inicioUtc && v.HoraSaida < fimUtc).ToList());
 
         public Task<int> ContarEstacionadosAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult(Veiculos.Count(v => v.EstaEstacionado));

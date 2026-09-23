@@ -10,6 +10,7 @@ public static class DependencyInjection
         services.Configure<EstacionamentoOptions>(configuration.GetSection(EstacionamentoOptions.SectionName));
         services.Configure<EstabelecimentoOptions>(configuration.GetSection(EstabelecimentoOptions.SectionName));
         services.AddSingleton<IRelogio, RelogioSistema>();
+        services.AddScoped<INotificadorEventos, NotificadorEventosNulo>();
         services.AddScoped<IEstacionamentoAppService, EstacionamentoAppService>();
 
         return services;

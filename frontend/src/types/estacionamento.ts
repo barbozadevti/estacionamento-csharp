@@ -40,6 +40,20 @@ export interface Estabelecimento {
   cnpj: string
 }
 
+export interface FaturamentoPorFormaPagamento {
+  formaPagamento: FormaPagamento
+  quantidade: number
+  total: number
+}
+
+export interface RelatorioFaturamento {
+  inicio: string
+  fim: string
+  totalVeiculos: number
+  totalArrecadado: number
+  porFormaPagamento: FaturamentoPorFormaPagamento[]
+}
+
 export interface ApiErrorBody {
   message: string
 }

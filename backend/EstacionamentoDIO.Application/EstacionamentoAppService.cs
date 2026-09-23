@@ -10,15 +10,18 @@ public class EstacionamentoAppService : IEstacionamentoAppService
 {
     private readonly IVeiculoRepository repositorio;
     private readonly IRelogio relogio;
+    private readonly INotificadorEventos notificador;
     private readonly EstacionamentoOptions opcoes;
 
     public EstacionamentoAppService(
         IVeiculoRepository repositorio,
         IRelogio relogio,
+        INotificadorEventos notificador,
         IOptions<EstacionamentoOptions> opcoes)
     {
         this.repositorio = repositorio;
         this.relogio = relogio;
+        this.notificador = notificador;
         this.opcoes = opcoes.Value;
     }
 
@@ -47,7 +50,11 @@ public class EstacionamentoAppService : IEstacionamentoAppService
         await repositorio.AdicionarAsync(veiculo, cancellationToken);
         await repositorio.SalvarAlteracoesAsync(cancellationToken);
 
-        return ParaDto(veiculo);
+        var dto = ParaDto(veiculo);
+        var status = await ObterStatusAsync(cancellationToken);
+        await notificador.NotificarEntradaAsync(dto, status, cancellationToken);
+
+        return dto;
     }
 
     public async Task<RegistrarSaidaResultDto> RegistrarSaidaAsync(string placa, FormaPagamento formaPagamento, CancellationToken cancellationToken = default)
@@ -59,7 +66,11 @@ public class EstacionamentoAppService : IEstacionamentoAppService
         var horas = veiculo.RegistrarSaida(relogio.AgoraUtc, opcoes.PrecoInicial, opcoes.PrecoPorHora, formaPagamento);
         await repositorio.SalvarAlteracoesAsync(cancellationToken);
 
-        return new RegistrarSaidaResultDto(ParaDto(veiculo), veiculo.ValorCobrado!.Value, horas, formaPagamento);
+        var resultado = new RegistrarSaidaResultDto(ParaDto(veiculo), veiculo.ValorCobrado!.Value, horas, formaPagamento);
+        var status = await ObterStatusAsync(cancellationToken);
+        await notificador.NotificarSaidaAsync(resultado, status, cancellationToken);
+
+        return resultado;
     }
 
     public async Task<List<VeiculoDto>> ListarEstacionadosAsync(CancellationToken cancellationToken = default)
@@ -82,6 +93,34 @@ public class EstacionamentoAppService : IEstacionamentoAppService
             Math.Max(0, opcoes.VagasTotais - ocupadas),
             opcoes.PrecoInicial,
             opcoes.PrecoPorHora);
+    }
+
+    public async Task<RelatorioFaturamentoDto> ObterRelatorioFaturamentoAsync(
+        DateTime? inicioUtc,
+        DateTime? fimUtc,
+        CancellationToken cancellationToken = default)
+    {
+        var agora = relogio.AgoraUtc;
+        var inicio = inicioUtc ?? new DateTime(agora.Year, agora.Month, agora.Day, 0, 0, 0, DateTimeKind.Utc);
+        var fim = fimUtc ?? inicio.AddDays(1);
+
+        var saidas = await repositorio.ListarSaidasNoPeriodoAsync(inicio, fim, cancellationToken);
+
+        var porFormaPagamento = saidas
+            .GroupBy(v => v.FormaPagamento!.Value)
+            .Select(grupo => new FaturamentoPorFormaPagamentoDto(
+                grupo.Key,
+                grupo.Count(),
+                grupo.Sum(v => v.ValorCobrado!.Value)))
+            .OrderByDescending(f => f.Total)
+            .ToList();
+
+        return new RelatorioFaturamentoDto(
+            inicio,
+            fim,
+            saidas.Count,
+            saidas.Sum(v => v.ValorCobrado!.Value),
+            porFormaPagamento);
     }
 
     private static VeiculoDto ParaDto(Veiculo veiculo) => new(

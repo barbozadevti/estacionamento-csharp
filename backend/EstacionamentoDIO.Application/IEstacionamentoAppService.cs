@@ -13,4 +13,6 @@ public interface IEstacionamentoAppService
     Task<List<VeiculoDto>> ListarHistoricoAsync(CancellationToken cancellationToken = default);
 
     Task<StatusEstacionamentoDto> ObterStatusAsync(CancellationToken cancellationToken = default);
+
+    Task<RelatorioFaturamentoDto> ObterRelatorioFaturamentoAsync(DateTime? inicioUtc, DateTime? fimUtc, CancellationToken cancellationToken = default);
 }

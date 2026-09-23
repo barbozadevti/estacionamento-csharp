@@ -10,6 +10,8 @@ public interface IVeiculoRepository
 
     Task<List<Veiculo>> ListarHistoricoAsync(CancellationToken cancellationToken = default);
 
+    Task<List<Veiculo>> ListarSaidasNoPeriodoAsync(DateTime inicioUtc, DateTime fimUtc, CancellationToken cancellationToken = default);
+
     Task<int> ContarEstacionadosAsync(CancellationToken cancellationToken = default);
 
     Task AdicionarAsync(Veiculo veiculo, CancellationToken cancellationToken = default);

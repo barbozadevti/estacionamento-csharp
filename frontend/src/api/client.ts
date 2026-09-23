@@ -3,12 +3,16 @@ import type {
   Estabelecimento,
   FormaPagamento,
   RegistrarSaidaResposta,
+  RelatorioFaturamento,
   StatusEstacionamento,
   Veiculo,
 } from '../types/estacionamento'
 
 const API_URL: string =
   (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:5080/api'
+
+/** Base do servidor (sem o sufixo /api), usada para montar a URL do hub do SignalR. */
+export const SERVER_URL: string = API_URL.replace(/\/api\/?$/, '')
 
 /**
  * Erro de aplicação: representa uma falha de comunicação com a API,
@@ -95,4 +99,15 @@ export function registrarSaida(
     method: 'POST',
     body: JSON.stringify({ formaPagamento }),
   })
+}
+
+export function buscarRelatorioFaturamento(
+  inicio?: Date,
+  fim?: Date,
+): Promise<RelatorioFaturamento> {
+  const params = new URLSearchParams()
+  if (inicio) params.set('inicio', inicio.toISOString())
+  if (fim) params.set('fim', fim.toISOString())
+  const query = params.toString()
+  return request<RelatorioFaturamento>(`/relatorio/faturamento${query ? `?${query}` : ''}`)
 }
