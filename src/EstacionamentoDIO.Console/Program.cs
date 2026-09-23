@@ -1,8 +1,8 @@
 using EstacionamentoDIO.Core;
 
 var estacionamento = new Estacionamento(
-    precoInicial: 5.00m,
-    precoPorHora: 2.00m,
+    precoInicial: 15.00m,
+    precoPorHora: 7.00m,
     vagasTotais: 10,
     arquivoDados: "estacionamento.json");
 
