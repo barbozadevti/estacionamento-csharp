@@ -21,9 +21,9 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
     {
-        Title = "Sistema de Estacionamento - Douglas Shaw Memorial Hospital",
+        Title = "Sistema de Estacionamento - Shaw Memorial Hospital",
         Version = "v1",
-        Description = "API REST para gestão de entrada, saída e vagas do estacionamento do Douglas Shaw Memorial Hospital. Desafio de projeto da DIO, evoluído para uma arquitetura em camadas.",
+        Description = "API REST para gestão de entrada, saída e vagas do estacionamento do Shaw Memorial Hospital. Desafio de projeto da DIO, evoluído para uma arquitetura em camadas.",
     });
 });
 
